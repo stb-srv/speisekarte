@@ -1,0 +1,115 @@
+name: Speisekarte
+version: 2.6.0
+description: "Verwaltet eine Speisekarte mit Kategorien, Inhaltsstoffen und Bildern. Speisekarte / speisekarte"
+icon: cutlery
+author:
+  name: Steven Behncke
+  email: admin@stb-srv.de
+homepage: https://stb-srv.de
+keywords: grav, plugin, speisekarte
+bugs: https://stb-srv.de/issues
+docs: https://stb-srv.de/docs
+license: Keine
+
+form:
+  validation: strict
+  fields:
+
+    info:
+      type: display
+      markdown: true
+      label: Hinweis
+      content: |
+        <span style="font-size:1.5em; font-weight:bold; color:#325a91;">
+          Hinweis
+        </span>
+        <hr style="border: 0; border-top: 2px solid #325a91; margin: 6px 0 12px 0;">
+        <div style="font-size:1.05em; color:#333;">
+        <b>Wichtig:</b>  
+          Damit die Speisekarte korrekt auf deiner Website angezeigt wird, musst du das Plugin auf einer Seite einbinden.<br><br>
+          Danach musst du eine Seite erstellen und über die Experten-Ansicht <code>template: speisekarte</code> in deine Seite einfügen, dann wird die Speisekarte richtig dargestellt.
+        </div>
+
+    enabled:
+      type: toggle
+      label: Plugin aktivieren
+      highlight: 1
+      default: 1
+      options:
+        1: Ja
+        0: Nein
+      validate:
+        type: bool
+
+    speisen:
+      type: list
+      label: "Speisen"
+      style: list
+      filterable: true
+      sortable: true
+      fields:
+        .nummer:
+          type: text
+          label: "Nummer"
+        .name:
+          type: text
+          label: "Name"
+        .beschreibung:
+          type: textarea
+          label: "Beschreibung"
+        .preis:
+          type: text
+          label: "Preis in €"
+        .inhaltsstoffe:
+          type: select
+          label: "Inhaltsstoffe"
+          multiple: true
+          size: 6
+          data-options@: '\Grav\Plugin\SpeisekartePlugin::getLegendeOptions'
+          validate:
+            type: array
+        .kategorie:
+          type: select
+          label: "Kategorie"
+          data-options@: '\Grav\Plugin\SpeisekartePlugin::getCategories'
+        .bild:
+          type: file
+          label: "Bild zur Speise (optional)"
+          destination: 'user://images_speisekarte'
+          multiple: false
+          accept:
+            - image/*
+    kategorien:
+      type: list
+      label: "Kategorien"
+      style: vertical
+      fields:
+        .name:
+          type: text
+          label: "Name"
+    legende:
+      type: list
+      label: "Inhaltsstoffe"
+      style: vertical
+      fields:
+        .code:
+          type: text
+          label: "Code"
+        .beschreibung:
+          type: text
+          label: "Beschreibung"
+    spalten:
+      type: select
+      label: "Anzahl der Spalten für Kategorien"
+      default: 2
+      options:
+        1: "1 Spalte"
+        2: "2 Spalten"
+        3: "3 Spalten"
+
+
+image_upload_path:
+  type: text
+  label: "Speicherort für Bilder"
+  default: 'user://images_speisekarte'
+  help: "Gib den Zielordner für Bilder an, z.B. 'user://images_speisekarte', 'user://pages/images', 'user://media/speisekarte' etc."

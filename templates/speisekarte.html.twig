@@ -1,0 +1,226 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+<style>
+.speisekarte {
+  display: grid;
+  grid-template-columns: repeat({{ spalten|default(1) }}, 1fr);
+  gap: 1em;
+}
+
+.accordion {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 1em;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  border-radius: 5px;
+}
+
+.accordion:hover {
+  background-color: #ddd;
+}
+
+.panel {
+  padding: 0 1em;
+  background-color: white;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  border-left: 2px solid #ccc;
+  border-right: 2px solid #ccc;
+  border-bottom: 2px solid #ccc;
+  border-radius: 0 0 5px 5px;
+}
+
+.speise-bild {
+  display: block;
+  max-width: 100%;
+  max-height: 300px;
+  height: auto;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.inhaltsstoffe {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0.5em 0;
+  font-style: italic;
+  color: #555;
+}
+
+.inhaltsstoffe li::before {
+  content: "• ";
+  color: #999;
+}
+
+.preis {
+  font-weight: bold;
+  font-style: italic;
+  margin-left: 0.5em;
+  color: #222;
+}
+
+.hinweis {
+  grid-column: 1 / -1;
+  font-style: italic;
+  color: #666;
+  margin-bottom: 1em;
+}
+
+/* --- DARK MODE SUPPORT --- */
+body.lightswitch-dark .speisekarte,
+[data-theme="dark"] .speisekarte {
+  background: none;
+  color: #fff;
+}
+
+body.lightswitch-dark .accordion,
+[data-theme="dark"] .accordion {
+  background-color: #263146;
+  color: #eee;
+  border: none;
+}
+
+body.lightswitch-dark .accordion.active,
+body.lightswitch-dark .accordion:hover,
+[data-theme="dark"] .accordion.active,
+[data-theme="dark"] .accordion:hover {
+  background-color: #4060a0;
+  color: #fff;
+}
+
+body.lightswitch-dark .panel,
+[data-theme="dark"] .panel {
+  background-color: #1a212f;
+  border-left: 2px solid #4060a0;
+  border-right: 2px solid #4060a0;
+  border-bottom: 2px solid #4060a0;
+  color: #eee;
+}
+
+body.lightswitch-dark .speise-bild,
+[data-theme="dark"] .speise-bild {
+  border: 2px solid #4060a0;
+}
+
+body.lightswitch-dark .inhaltsstoffe,
+[data-theme="dark"] .inhaltsstoffe {
+  color: #bbb;
+}
+
+body.lightswitch-dark .inhaltsstoffe li::before,
+[data-theme="dark"] .inhaltsstoffe li::before {
+  color: #6080d0;
+}
+
+body.lightswitch-dark .preis,
+[data-theme="dark"] .preis {
+  color: #ffda70;
+}
+
+body.lightswitch-dark .hinweis,
+[data-theme="dark"] .hinweis {
+  color: #a9c1fa;
+}
+
+body.lightswitch-dark .accordion,
+[data-theme="dark"] .accordion {
+  color: #FFD700 !important;
+}
+
+@media (max-width: 900px) {
+  .speisekarte {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const acc = document.querySelectorAll(".accordion");
+
+  acc.forEach(el => {
+    el.addEventListener("click", function () {
+      this.classList.toggle("active");
+      const panel = this.nextElementSibling;
+
+      if (panel.style.maxHeight) {
+        panel.style.maxHeight = null;
+      } else {
+        panel.style.maxHeight = panel.scrollHeight + "px";
+      }
+    });
+  });
+});
+</script>
+
+<div class="speisekarte">
+  <div class="hinweis">🔽 Klicke auf eine Kategorie, um die Speisen einzublenden.</div>
+
+  {% set kategorien_map = {} %}
+  {% for speise in config.plugins.speisekarte.speisen %}
+    {% set kat = speise.kategorie|default('Keine_Zuordnung') %}
+    {% set kategorien_map = kategorien_map|merge({
+      (kat): kategorien_map[kat]|default([])|merge([speise])
+    }) %}
+  {% endfor %}
+
+  {% for kategorie, liste in kategorien_map %}
+    <div>
+      <button class="accordion">{{ kategorie }}</button>
+      <div class="panel">
+        <ul>
+          {% for speise in liste %}
+            <li>
+              <strong>{{ speise.nummer }} {{ speise.name }}</strong>
+              {% if speise.preis %}
+                <span class="preis"> — {{ speise.preis }} €</span>
+              {% endif %}
+              <br>
+              {{ speise.beschreibung }}<br>
+
+              {% set codes = [] %}
+              {% if speise.inhaltsstoffe is iterable %}
+                {% set codes = speise.inhaltsstoffe %}
+              {% elseif speise.inhaltsstoffe %}
+                {% set codes = speise.inhaltsstoffe|split(',') %}
+              {% endif %}
+
+              {% if codes|length > 0 and config.plugins.speisekarte.legende is iterable %}
+                <ul class="inhaltsstoffe">
+                  {% for code in codes %}
+                    {% for leg in config.plugins.speisekarte.legende %}
+                      {% if leg.code is defined and leg.beschreibung is defined %}
+                        {% if leg.code == code|trim %}
+                          <li>{{ leg.beschreibung }}</li>
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+
+              {# KORREKTE Bild-Ausgabe für beliebigen Zielordner #}
+              {% if speise.bild is iterable and speise.bild|length > 0 %}
+                {% set bild = speise.bild|first %}
+                {% if bild.path is defined %}
+                  <img src="{{ url(bild.path) }}" alt="{{ speise.name }}" class="speise-bild">
+                {% endif %}
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
