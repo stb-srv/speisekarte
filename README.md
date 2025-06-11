@@ -100,7 +100,7 @@ Alle Einstellungen findest du im Admin-Panel unter **Plugins > Speisekarte**.
 > Einfach im Plugin im Admin neue Speisen/Kategorien anlegen, bearbeiten oder löschen. Die Ausgabe auf der Seite passt sich sofort an.
 
 **Wie kann ich die Reihenfolge der Kategorien ändern?**  
-> Kategorien und Speisen lassen sich im Admin-Panel sortieren.
+> Kategorien und Speisen lassen sich aktuell nicht beliebig sortieren.
 
 **Kann ich mehrere Speisekarten für verschiedene Seiten/Sprachen verwalten?**  
 > Ja, über die Plugin-Einstellungen und ggf. mehrsprachige Inhalte von Grav.
