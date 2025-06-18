@@ -9,7 +9,7 @@ homepage: https://stb-srv.de
 keywords: grav, plugin, speisekarte
 bugs: https://stb-srv.de/issues
 docs: https://stb-srv.de/docs
-license: Keine
+license: MIT
 
 form:
   validation: strict
